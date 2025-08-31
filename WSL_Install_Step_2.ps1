@@ -51,15 +51,23 @@ wsl -u root -d $distro sh -c "usermod -a -G adm,cdrom,sudo,dip,plugdev,users ${u
 wsl -u root -d $distro sh -c "echo '${username} ALL=(ALL:ALL) NOPASSWD:ALL' > /etc/sudoers.d/${username}"
 
 Write-Output "$(Get-Date) Config WSL"
-$wslcmd = "cat <<EOF > /etc/wsl.conf
+$wslCondfigCmd = "cat <<EOF > /etc/wsl.conf
 [boot]
 systemd = true
 [user]
 default=${username}
 EOF"
 
-$wslcmd = $wslcmd -replace "`r", ""
+$wslCondfigCmd = $wslCondfigCmd -replace "`r", ""
 wsl -u root -d $distro sh -c "$wslcmd"
+
+$wslconfigContent = @"
+[wsl2]
+memory=2GB
+processors=2
+"@
+$wslConfigPath = "$env:USERPROFILE\.wslconfig"
+Set-Content -Path $wslConfigPath -Value $wslconfigContent -Encoding UTF8
 
 Write-Output "$(Get-Date) Add ssh key mount"
 $SshFolder = Join-Path -Path $HOME -ChildPath ".ssh"
